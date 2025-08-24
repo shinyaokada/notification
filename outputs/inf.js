@@ -21,10 +21,10 @@ function createConfigSpreadsheet() {
   // 基本設定のヘッダーとデフォルト値
   const basicData = [
     ['項目名', '値'],
-    ['会社名', 'ケンブリッジコンサルティング'],
-    ['Chat Webhook URL', 'https://chat.googleapis.com/v1/spaces/AAAAyJcGaP8/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=2HYAMZ1E2Vsk2TL8OKWCHpcxvuUn4qGEDDgIaXoRiS8'],
+    ['会社名', 'インフレーション'],
+    ['Chat Webhook URL', 'https://chat.googleapis.com/v1/spaces/AAQA954JO3M/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=N7mTDMg1pjnt3460dXhuJcQFz6xDEz9gmKVct9rabo8'],
     ['応募管理シート名', '求人応募管理シート'],
-    ['追加メッセージ', '面談者 畑下（佐藤凪義） \n 経験者: https://timerex.net/s/n.sato_9d5f_ee1c/3792cf6a \n 未経験者: https://timerex.net/s/y.matsumoto_9445_6a5c/ee9c2f8f']
+    ['追加メッセージ', '面談者 魚澤 \n 経験者: https://timerex.net/s/k.uozawa_4844_2b4e/96902d56 \n 未経験者: https://timerex.net/s/y.matsumoto_9445_6a5c/ee9c2f8f']
   ];
   
   basicSheet.getRange(1, 1, basicData.length, 2).setValues(basicData);
@@ -41,15 +41,15 @@ function createConfigSpreadsheet() {
   
   // デフォルトの求人サイト設定
   const siteData = [
-    ['マイナビ', 'mt.customer@mynavi.jp', '応募受付', '・応募者への連絡は、応募管理システムMIWSの「応募管理」または「メッセージ」をご利用ください。', '応募データの詳細は、下記手順にてご確認ください。', 'cbc8787', 'cc_114saiyo'],
-    ['type', 'noreply@notification.type.jp', '応募がありました', '新しい応募がありましたので、お知らせいたします。', '応募者とのやり取りは「即レスポンス」が大切です。', 'hr223639', 'hrcc0303'],
-    ['Direct type', 'cl-info@directtype.jp', '新着の応募', 'いつもお世話になっております。Direct type事務局です。', 'ＮＧの場合であっても、必ずご返信いただきますようお願い申し上げます。', '45704/s.wakabayashi@engineer-mikata.com', 'hrcc0417'],
-    ['Direct type', 'cl-info@directtype.jp', '応募者対応のお願い', '引き続きご対応をお願いしたく、改めてご連絡を差し上げております。', '■ 管理画面のアカウントが未認証のご担当者様へ', '45704/s.wakabayashi@engineer-mikata.com', 'hrcc0417'],
-    ['EN転職', 'support@employment.en-japan.com', '新着応募のお知らせ', '下記URLより、応募者の詳細情報をご確認ください。', '※ 応募者対応の早さは、貴社の採用活動を有利にします。', 'ENS793526', 'cc2412ses'],
-    ['EN転職', 'support@employment.en-japan.com', '「気になる」', '人事ご担当者様', '※気になる企業からの 『会ってみたい』 は、通常の５倍の反応率※', 'ENS793526', 'cc2412ses'],
-    ['エンゲージ', 'system@en-gage.net', '新着応募のお知らせ', '下記URLより、応募内容をご確認の上、ご対応をお願いします。', 'ご不明点は、', 'ENS793526', 'cc2412ses'],
-    ['ヤギオファー', 'noreply_yagi@yagish.jp', 'オファーを送った求職者から承認されました', '<a href="', '">', 'hr@cambridgeconsulting.co.jp', 'sescc7878'],
-    ['doda', 'connect@doda.jp', '応募通知', '窓口：doda窓口', '--本件に関するお問い合わせ先---------------------', 's.wakabayashi@engineer-mikata.com', 'Cc120_saiyo']
+    ['マイナビ', 'mt.customer@mynavi.jp', '応募受付', '・応募者への連絡は、応募管理システムMIWSの「応募管理」または「メッセージ」をご利用ください。', '応募データの詳細は、下記手順にてご確認ください。', 'tba55', 'infraTi-07@'],
+    ['type', 'noreply@notification.type.jp', '応募がありました', '新しい応募がありましたので、お知らせいたします。', '応募者とのやり取りは「即レスポンス」が大切です。', '', ''],
+    ['Direct type', 'cl-info@directtype.jp', '新着の応募', 'いつもお世話になっております。Direct type事務局です。', 'ＮＧの場合であっても、必ずご返信いただきますようお願い申し上げます。', '', ''],
+    ['Direct type', 'cl-info@directtype.jp', '応募者対応のお願い', '引き続きご対応をお願いしたく、改めてご連絡を差し上げております。', '■ 管理画面のアカウントが未認証のご担当者様へ', '', ''],
+    ['EN転職', 'support@employment.en-japan.com', '新着応募のお知らせ', '下記URLより、応募者の詳細情報をご確認ください。', '※ 応募者対応の早さは、貴社の採用活動を有利にします。', 'ENS334134', 'infraTi-07@e'],
+    ['EN転職', 'support@employment.en-japan.com', '「気になる」', '人事ご担当者様', '※気になる企業からの 『会ってみたい』 は、通常の５倍の反応率※', 'ENS334134', 'infraTi-07@e'],
+    ['エンゲージ', 'system@en-gage.net', '新着応募のお知らせ', '下記URLより、応募内容をご確認の上、ご対応をお願いします。', 'ご不明点は、', 'ENS334134', 'infraTi-07@e'],
+    ['ヤギオファー', 'noreply_yagi@yagish.jp', 'オファーを送った求職者から承認されました', '<a href="', '">', '', ''],
+    ['doda', 'connect@doda.jp', '応募通知', '窓口：doda窓口', '--本件に関するお問い合わせ先---------------------', '', '']
   ];
   
   const allData = [siteHeaders[0], ...siteData];

@@ -1,20 +1,86 @@
 
-
-/* ここまでCONFIG　ここから共通 */
+// 設定をスプレッドシートから読み込む関数
+function loadConfig() {
+  try {
+    // 設定スプレッドシートを検索
+    const files = DriveApp.getFilesByName(CONFIG_SPREADSHEET_NAME);
+    if (!files.hasNext()) {
+      console.log('設定スプレッドシートが見つかりません。新規作成します。');
+      createConfigSpreadsheet();
+      throw new Error('設定スプレッドシートを作成しました。再度実行してください。');
+    }
+    
+    const spreadsheet = SpreadsheetApp.openById(files.next().getId());
+    
+    // 基本設定の読み込み
+    const basicSheet = spreadsheet.getSheetByName('基本設定');
+    const basicData = basicSheet.getDataRange().getValues();
+    
+    // ヘッダー行をスキップして設定を読み込む
+    for (let i = 1; i < basicData.length; i++) {
+      const [key, value] = basicData[i];
+      switch (key) {
+        case '会社名':
+          CONFIG.COMPANY_NAME = value;
+          break;
+        case 'Chat Webhook URL':
+          CONFIG.CHAT_WEBHOOK_URL = value;
+          break;
+        case '応募管理シート名':
+          CONFIG.SPREADSHEET_NAME = value;
+          break;
+        case '追加メッセージ':
+          CONFIG.EXTRA_MESSAGE = value;
+          break;
+      }
+    }
+    
+    // 求人サイト設定の読み込み
+    const siteSheet = spreadsheet.getSheetByName('求人サイト設定');
+    const siteData = siteSheet.getDataRange().getValues();
+    
+    CONFIG.EMAIL_CONFIGS = [];
+    // ヘッダー行をスキップ
+    for (let i = 1; i < siteData.length; i++) {
+      const [name, email, keyword, startKeyword, endKeyword, loginaddress, password] = siteData[i];
+      
+      // 空行はスキップ
+      if (!name || !email) continue;
+      
+      CONFIG.EMAIL_CONFIGS.push({
+        name,
+        email,
+        keyword,
+        startKeyword,
+        endKeyword,
+        loginaddress,
+        password
+      });
+    }
+    
+    console.log('設定を読み込みました');
+    console.log('会社名:', CONFIG.COMPANY_NAME);
+    console.log('求人サイト数:', CONFIG.EMAIL_CONFIGS.length);
+    
+  } catch (error) {
+    console.error('設定の読み込みエラー:', error);
+    throw error;
+  }
+}
 
 // スプレッドシートを取得または作成する関数
 function getOrCreateSpreadsheet() {
   let spreadsheet;
   
   // まず既存のファイルを名前で検索
-  const files = DriveApp.getFilesByName(SPREADSHEET_NAME);
+  const files = DriveApp.getFilesByName(CONFIG.SPREADSHEET_NAME);
   if (files.hasNext()) {
     const file = files.next();
     spreadsheet = SpreadsheetApp.openById(file.getId());
     console.log('既存のスプレッドシートを使用:', file.getId());
   } else {
     // 存在しない場合は新規作成
-    spreadsheet = SpreadsheetApp.create(SPREADSHEET_NAME);
+    spreadsheet = SpreadsheetApp.create(CONFIG.SPREADSHEET_NAME);
     const sheet = spreadsheet.getActiveSheet();
     
     // ヘッダーを設定
@@ -28,12 +94,15 @@ function getOrCreateSpreadsheet() {
 }
 
 function checkEmailsAndSendToChat() {
+  // 設定を読み込む
+  loadConfig();
+  
   // スプレッドシートを取得または作成
   const spreadsheet = getOrCreateSpreadsheet();
   const sheet = spreadsheet.getActiveSheet();
 
-  EMAIL_CONFIGS.forEach(config => {
-    const { email, keyword, startKeyword, endKeyword, loginaddress, password ,name } = config;
+  CONFIG.EMAIL_CONFIGS.forEach(config => {
+    const { email, keyword, startKeyword, endKeyword, loginaddress, password, name } = config;
 
     // Gmailから未読メールを検索
     const query = `from:${email} subject:${keyword} is:unread`;
@@ -65,13 +134,13 @@ function checkEmailsAndSendToChat() {
         message.moveToTrash();
 
         // COMPANY_NAME と一致するデータが既存スプレッドシートにある場合はスキップ
-        if (isDuplicateRecord(sheet, COMPANY_NAME, processedMessage)) {
+        if (isDuplicateRecord(sheet, CONFIG.COMPANY_NAME, processedMessage)) {
           console.log("重複した応募者を検出:",processedMessage);
           return;
         }
 
         // スプレッドシートに記録
-        logToSpreadsheet(sheet, COMPANY_NAME, processedMessage);
+        logToSpreadsheet(sheet, CONFIG.COMPANY_NAME, processedMessage);
 
         // Google Chat に送信
         console.log(processedMessage);
@@ -87,7 +156,7 @@ function processApplication(emailBody, startKeyword, endKeyword, loginAddress, p
   const endIndex = emailBody.indexOf(endKeyword, startIndex);
 
   if (startIndex === -1 || endIndex === -1) {
-    return `エラー発生。気づいた人はメンションして岡田に報告してください。媒体が送る文章テンプレートが変更されていますので、切り取り条件を修正する必要があります。媒体: ${name}`;
+    return `エラー発生。気づいた人はメンションして岡田に報告してください。媒体が送る文章テンプレートが変更されていますので、切り取り条件を修正する必要があります。媒体: ${name}\n ${emailBody}`;
   }
 
   const actualStartIndex = startIndex + startKeyword.length;
@@ -99,7 +168,7 @@ function processApplication(emailBody, startKeyword, endKeyword, loginAddress, p
     actionWord = '気になる';
   }
 
-  const result = `${name}より${COMPANY_NAME}に${actionWord}がありました。\n\n${processedContent}${loginInfo} \n${EXTRA_MESSAGE}`;
+  const result = `${name}より${CONFIG.COMPANY_NAME}に${actionWord}がありました。\n\n${processedContent}${loginInfo} \n${CONFIG.EXTRA_MESSAGE}`;
 
   return result;
 }
@@ -138,7 +207,7 @@ function sendMessageToChat(body) {
   };
 
   try {
-    UrlFetchApp.fetch(CHAT_WEBHOOK_URL, options);
+    UrlFetchApp.fetch(CONFIG.CHAT_WEBHOOK_URL, options);
   } catch (error) {
     console.error('Chat送信エラー:', error);
   }
@@ -163,6 +232,14 @@ function createTrigger() {
 
 // 初回セットアップ用の関数
 function setup() {
+  // 設定スプレッドシートの確認・作成
+  try {
+    loadConfig();
+  } catch (error) {
+    console.log('初回セットアップ:', error.message);
+    return;
+  }
+  
   // スプレッドシートを作成
   const spreadsheet = getOrCreateSpreadsheet();
   console.log('スプレッドシートID:', spreadsheet.getId());
@@ -173,4 +250,18 @@ function setup() {
   
   // テスト実行
   checkEmailsAndSendToChat();
+}
+
+// 設定確認用の関数（手動実行用）
+function checkConfig() {
+  loadConfig();
+  console.log('===== 現在の設定 =====');
+  console.log('会社名:', CONFIG.COMPANY_NAME);
+  console.log('Chat Webhook URL:', CONFIG.CHAT_WEBHOOK_URL);
+  console.log('応募管理シート名:', CONFIG.SPREADSHEET_NAME);
+  console.log('追加メッセージ:', CONFIG.EXTRA_MESSAGE);
+  console.log('\n求人サイト設定:');
+  CONFIG.EMAIL_CONFIGS.forEach((config, index) => {
+    console.log(`${index + 1}. ${config.name} - ${config.email}`);
+  });
 }
